@@ -2,25 +2,28 @@ package com.example.daoHibernate.repositories;
 
 import com.example.daoHibernate.models.Person;
 import org.springframework.stereotype.Repository;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class DbWorker {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    private final PersonRepository personRepository;
 
-    @Transactional
+    public DbWorker(PersonRepository personRepository) {
+        this.personRepository = personRepository;
+    }
+
     public List<Person> getPersonByCity(String city) {
-        String queryJsql = "SELECT p FROM Person p WHERE lower(p.cityOfLiving) = :city";
-        TypedQuery<Person> typedQuery = entityManager.createQuery(queryJsql, Person.class);
-        typedQuery.setParameter("city", city.toLowerCase());
-        return typedQuery.getResultList();
+        return personRepository.findByCityOfLivingIgnoreCase(city);
+    }
+
+    public List<Person> getPersonByAgeLessThanSorted(int age) {
+        return personRepository.findByAgeLessThanOrderByAge(age);
+    }
+
+    public Optional<List<Person>> getPersonByNameAndSurname(String name, String surname) {
+        return personRepository.findByNameIgnoreCaseAndSurnameIgnoreCase(name, surname);
     }
 
 }
